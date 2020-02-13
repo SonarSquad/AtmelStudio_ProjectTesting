@@ -21,25 +21,30 @@
 // Må lage en pinDefines.h som inneholder alle defines for å gjøre alt mere oversiktlig!
 
 
-void PortDir(void);
+void PWM_Init(void);
 void ClkSelect(void);
-void Timer_Init(void);
+void Timer0_Init(void);
 
 
 
 int main(void)
 {
 	ClkSelect();
-	PortDir();   
+	PWM_Init();   
+	Timer0_Init();
 	
-	
+	PORTF_DIR = PIN5_bm;
 	
     while (1) 
     {
+		
+		PORTF.OUTTGL = PIN5_bm;
+		_delay_ms(200);
+		
     }
 }
 
-void PortDir(void){
+void PWM_Init(void){
 	PORTD_DIR = (PWM1 | PWM2);  //Setting PWM pins as output
 }
 
@@ -48,6 +53,9 @@ void ClkSelect(void){
 	
 }
 
-void Timer_Init(void){
+void Timer0_Init(void){
+	PORTMUX.TCAROUTEA = 0x3; //Enables PORTMUXD to achieve Waveform Output on the PWM Pins
+	TCA0.SINGLE.CTRLA = (1<<0); //Enables Timer 0
+	TCA0.SINGLE.CTRLB = (1<<4) | (1<<5) | (1<<1); //Sets PWM1 and PWM0 as the waveform output pin and enables frequency generation.
 	
 }
