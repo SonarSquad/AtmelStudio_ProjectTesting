@@ -10,6 +10,9 @@ Discarded input sections
  .text          0x00000000        0x0 main.o
  .data          0x00000000        0x0 main.o
  .bss           0x00000000        0x0 main.o
+ .text.PortDir  0x00000000        0x8 main.o
+ .text.Timer_Init
+                0x00000000        0x2 main.o
  .text          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avrxmega3\libgcc.a(_exit.o)
  .data          0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avrxmega3\libgcc.a(_exit.o)
  .bss           0x00000000        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avrxmega3\libgcc.a(_exit.o)
@@ -153,7 +156,7 @@ END GROUP
 .rela.plt
  *(.rela.plt)
 
-.text           0x00000000       0xcc
+.text           0x00000000       0xd4
  *(.vectors)
  .vectors       0x00000000       0xa0 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega4809/avrxmega3/crtatmega4809.o
                 0x00000000                __vector_default
@@ -250,13 +253,16 @@ END GROUP
                 0x000000b4                __vector_20
                 0x000000b8                . = ALIGN (0x2)
  *(.text.*)
- .text.main     0x000000b8       0x10 main.o
-                0x000000b8                main
-                0x000000c8                . = ALIGN (0x2)
+ .text.ClkSelect
+                0x000000b8        0xc main.o
+                0x000000b8                ClkSelect
+ .text.main     0x000000c4        0xc main.o
+                0x000000c4                main
+                0x000000d0                . = ALIGN (0x2)
  *(.fini9)
- .fini9         0x000000c8        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avrxmega3\libgcc.a(_exit.o)
-                0x000000c8                _exit
-                0x000000c8                exit
+ .fini9         0x000000d0        0x0 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avrxmega3\libgcc.a(_exit.o)
+                0x000000d0                _exit
+                0x000000d0                exit
  *(.fini9)
  *(.fini8)
  *(.fini8)
@@ -275,16 +281,16 @@ END GROUP
  *(.fini1)
  *(.fini1)
  *(.fini0)
- .fini0         0x000000c8        0x4 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avrxmega3\libgcc.a(_exit.o)
+ .fini0         0x000000d0        0x4 c:/program files (x86)/atmel/studio/7.0/toolchain/avr8/avr8-gnu-toolchain/bin/../lib/gcc/avr/5.4.0/avrxmega3\libgcc.a(_exit.o)
  *(.fini0)
-                0x000000cc                _etext = .
+                0x000000d4                _etext = .
 
 .rodata
  *(.rodata)
  *(.rodata*)
  *(.gnu.linkonce.r*)
 
-.data           0x00802800        0x0 load address 0x000000cc
+.data           0x00802800        0x0 load address 0x000000d4
                 [!provide]                PROVIDE (__data_start, .)
  *(.data)
  *(.data*)
@@ -299,8 +305,8 @@ END GROUP
  *(.bss*)
  *(COMMON)
                 [!provide]                PROVIDE (__bss_end, .)
-                0x000000cc                __data_load_start = LOADADDR (.data)
-                0x000000cc                __data_load_end = (__data_load_start + SIZEOF (.data))
+                0x000000d4                __data_load_start = LOADADDR (.data)
+                0x000000d4                __data_load_end = (__data_load_start + SIZEOF (.data))
 
 .noinit         0x00802800        0x0
                 [!provide]                PROVIDE (__noinit_start, .)
@@ -371,38 +377,38 @@ END GROUP
 .debug_sfnames
  *(.debug_sfnames)
 
-.debug_aranges  0x00000000       0x20
+.debug_aranges  0x00000000       0x38
  *(.debug_aranges)
  .debug_aranges
-                0x00000000       0x20 main.o
+                0x00000000       0x38 main.o
 
 .debug_pubnames
  *(.debug_pubnames)
 
-.debug_info     0x00000000     0x3145
+.debug_info     0x00000000     0x283e
  *(.debug_info .gnu.linkonce.wi.*)
  .debug_info    0x00000000     0x2517 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega4809/avrxmega3/crtatmega4809.o
- .debug_info    0x00002517      0xc2e main.o
+ .debug_info    0x00002517      0x327 main.o
 
-.debug_abbrev   0x00000000     0x240a
+.debug_abbrev   0x00000000     0x2417
  *(.debug_abbrev)
  .debug_abbrev  0x00000000     0x2320 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega4809/avrxmega3/crtatmega4809.o
- .debug_abbrev  0x00002320       0xea main.o
+ .debug_abbrev  0x00002320       0xf7 main.o
 
-.debug_line     0x00000000      0x294
+.debug_line     0x00000000      0x2ca
  *(.debug_line .debug_line.* .debug_line_end)
  .debug_line    0x00000000      0x187 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega4809/avrxmega3/crtatmega4809.o
- .debug_line    0x00000187      0x10d main.o
+ .debug_line    0x00000187      0x143 main.o
 
-.debug_frame    0x00000000       0x24
+.debug_frame    0x00000000       0x54
  *(.debug_frame)
- .debug_frame   0x00000000       0x24 main.o
+ .debug_frame   0x00000000       0x54 main.o
 
-.debug_str      0x00000000     0x15f4
+.debug_str      0x00000000     0x132a
  *(.debug_str)
  .debug_str     0x00000000      0xfc0 C:/Program Files (x86)/Atmel/Studio/7.0/Packs/atmel/ATmega_DFP/1.2.209/gcc/dev/atmega4809/avrxmega3/crtatmega4809.o
- .debug_str     0x00000fc0      0x634 main.o
-                                0x677 (size before relaxing)
+ .debug_str     0x00000fc0      0x36a main.o
+                                0x3aa (size before relaxing)
 
 .debug_loc
  *(.debug_loc)
@@ -425,9 +431,9 @@ END GROUP
 .debug_pubtypes
  *(.debug_pubtypes)
 
-.debug_ranges   0x00000000       0x10
+.debug_ranges   0x00000000       0x28
  *(.debug_ranges)
- .debug_ranges  0x00000000       0x10 main.o
+ .debug_ranges  0x00000000       0x28 main.o
 
 .debug_macro
  *(.debug_macro)
