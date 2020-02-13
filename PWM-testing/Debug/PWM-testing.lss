@@ -13,17 +13,17 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   CONTENTS, READONLY
   4 .debug_aranges 00000038  00000000  00000000  000001d0  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   00003557  00000000  00000000  00000208  2**0
+  5 .debug_info   0000358d  00000000  00000000  00000208  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 000024d7  00000000  00000000  0000375f  2**0
+  6 .debug_abbrev 000024d7  00000000  00000000  00003795  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   0000036d  00000000  00000000  00005c36  2**0
+  7 .debug_line   0000036d  00000000  00000000  00005c6c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000054  00000000  00000000  00005fa4  2**2
+  8 .debug_frame  00000054  00000000  00000000  00005fdc  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    00001779  00000000  00000000  00005ff8  2**0
+  9 .debug_str    0000180f  00000000  00000000  00006030  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_ranges 00000028  00000000  00000000  00007771  2**0
+ 10 .debug_ranges 00000028  00000000  00000000  0000783f  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -89,7 +89,7 @@ void PWM_Init(void){
 }
 
 void ClkSelect(void){
-	_PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, 0); //Forces 20MHz CPU cloock frequency
+	_PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, 0); //Forces 20MHz CPU clock frequency
   b8:	90 e0       	ldi	r25, 0x00	; 0
   ba:	88 ed       	ldi	r24, 0xD8	; 216
   bc:	84 bf       	out	0x34, r24	; 52
@@ -101,7 +101,7 @@ void ClkSelect(void){
 }
 
 void Timer0_Init(void){
-	PORTMUX.TCAROUTEA = 0x3;
+	PORTMUX.TCAROUTEA = PORTMUX_TCA0_PORTD_gc; //Enables PORTMUXD to achieve Waveform Output on the PWM Pins
   c4:	83 e0       	ldi	r24, 0x03	; 3
   c6:	80 93 e4 05 	sts	0x05E4, r24	; 0x8005e4 <__TEXT_REGION_LENGTH__+0x7005e4>
 	TCA0.SINGLE.CTRLA = (1<<0); //Enables Timer 0

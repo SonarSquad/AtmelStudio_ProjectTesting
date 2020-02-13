@@ -49,12 +49,12 @@ void PWM_Init(void){
 }
 
 void ClkSelect(void){
-	_PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, 0); //Forces 20MHz CPU cloock frequency
+	_PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, 0); //Forces 20MHz CPU clock frequency
 	
 }
 
 void Timer0_Init(void){
-	PORTMUX.TCAROUTEA = 0x3; //Enables PORTMUXD to achieve Waveform Output on the PWM Pins
+	PORTMUX.TCAROUTEA = PORTMUX_TCA0_PORTD_gc; //Enables PORTMUXD to achieve Waveform Output on the PWM Pins
 	TCA0.SINGLE.CTRLA = (1<<0); //Enables Timer 0
 	TCA0.SINGLE.CTRLB = (1<<4) | (1<<5) | (1<<1); //Sets PWM1 and PWM0 as the waveform output pin and enables frequency generation.
 	
