@@ -15,19 +15,29 @@
 //hei
 //test2
 
+void clk_init(void);
+
 int main(void)
 {
-    _PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, 0);
+	PWM_init();
+	
+	
+	
+	//CLKCTRL.MCLKCTRLA = (0<<2) | (0<<1);
     //FUSE.OSCCFG = (1<<1);
 	
 	PORTF_DIR = PIN5_bm;
-	
+
 			
     while (1) 
     {
 		PORTF.OUTTGL = PIN5_bm;
-		_delay_ms(500); 
-
+		_delay_ms(500);
     }
 }
 
+void clk_init (void)
+{
+	_PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, 0);
+	_PROTECTED_WRITE(CLKCTRL.MCLKCTRLA, )
+}
