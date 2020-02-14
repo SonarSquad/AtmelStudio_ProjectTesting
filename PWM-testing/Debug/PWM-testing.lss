@@ -3,27 +3,27 @@ PWM-testing.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00802800  00802800  0000015e  2**0
+  0 .data         00000000  00802800  00802800  00000186  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         0000010a  00000000  00000000  00000054  2**1
+  1 .text         00000132  00000000  00000000  00000054  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .comment      00000030  00000000  00000000  0000015e  2**0
+  2 .comment      00000030  00000000  00000000  00000186  2**0
                   CONTENTS, READONLY
-  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000190  2**2
+  3 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  000001b8  2**2
                   CONTENTS, READONLY
-  4 .debug_aranges 00000038  00000000  00000000  000001d0  2**0
+  4 .debug_aranges 00000038  00000000  00000000  000001f8  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   0000358d  00000000  00000000  00000208  2**0
+  5 .debug_info   000035cf  00000000  00000000  00000230  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 000024d7  00000000  00000000  00003795  2**0
+  6 .debug_abbrev 000024d7  00000000  00000000  000037ff  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   0000036d  00000000  00000000  00005c6c  2**0
+  7 .debug_line   0000038b  00000000  00000000  00005cd6  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000054  00000000  00000000  00005fdc  2**2
+  8 .debug_frame  00000054  00000000  00000000  00006064  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    0000180f  00000000  00000000  00006030  2**0
+  9 .debug_str    00001929  00000000  00000000  000060b8  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_ranges 00000028  00000000  00000000  0000783f  2**0
+ 10 .debug_ranges 00000028  00000000  00000000  000079e1  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -77,97 +77,130 @@ Disassembly of section .text:
   a6:	cd bf       	out	0x3d, r28	; 61
   a8:	df e3       	ldi	r29, 0x3F	; 63
   aa:	de bf       	out	0x3e, r29	; 62
-  ac:	0e 94 6c 00 	call	0xd8	; 0xd8 <main>
-  b0:	0c 94 83 00 	jmp	0x106	; 0x106 <_exit>
+  ac:	0e 94 80 00 	call	0x100	; 0x100 <main>
+  b0:	0c 94 97 00 	jmp	0x12e	; 0x12e <_exit>
 
 000000b4 <__bad_interrupt>:
   b4:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
 000000b8 <ClkSelect>:
-void PWM_Init(void){
-	PORTD_DIR = (PWM1 | PWM2);  //Setting PWM pins as output
+	
+	
 }
 
 void ClkSelect(void){
 	_PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, 0); //Forces 20MHz CPU clock frequency
-  b8:	90 e0       	ldi	r25, 0x00	; 0
-  ba:	88 ed       	ldi	r24, 0xD8	; 216
+  b8:	88 ed       	ldi	r24, 0xD8	; 216
+  ba:	90 e0       	ldi	r25, 0x00	; 0
   bc:	84 bf       	out	0x34, r24	; 52
   be:	90 93 61 00 	sts	0x0061, r25	; 0x800061 <__TEXT_REGION_LENGTH__+0x700061>
-  c2:	08 95       	ret
+	_PROTECTED_WRITE(CLKCTRL.MCLKCTRLA, (1<<7)); //Sender klokke-signal ut på PA7-pin
+  c2:	90 e8       	ldi	r25, 0x80	; 128
+  c4:	84 bf       	out	0x34, r24	; 52
+  c6:	90 93 60 00 	sts	0x0060, r25	; 0x800060 <__TEXT_REGION_LENGTH__+0x700060>
+	PORTA_DIR |= (1<<7); //PA7 as output for clock frequency check
+  ca:	e0 e0       	ldi	r30, 0x00	; 0
+  cc:	f4 e0       	ldi	r31, 0x04	; 4
+  ce:	80 81       	ld	r24, Z
+  d0:	80 68       	ori	r24, 0x80	; 128
+  d2:	80 83       	st	Z, r24
+  d4:	08 95       	ret
 
-000000c4 <Timer0_Init>:
+000000d6 <Timer0_Init>:
 	
 }
 
 void Timer0_Init(void){
-	PORTMUX.TCAROUTEA = PORTMUX_TCA0_PORTD_gc; //Enables PORTMUXD to achieve Waveform Output on the PWM Pins
-  c4:	83 e0       	ldi	r24, 0x03	; 3
-  c6:	80 93 e4 05 	sts	0x05E4, r24	; 0x8005e4 <__TEXT_REGION_LENGTH__+0x7005e4>
-	TCA0.SINGLE.CTRLA = (1<<0); //Enables Timer 0
-  ca:	e0 e0       	ldi	r30, 0x00	; 0
-  cc:	fa e0       	ldi	r31, 0x0A	; 10
-  ce:	81 e0       	ldi	r24, 0x01	; 1
-  d0:	80 83       	st	Z, r24
-	TCA0.SINGLE.CTRLB = (1<<4) | (1<<5) | (1<<1); //Sets PWM1 and PWM0 as the waveform output pin and enables frequency generation.
-  d2:	82 e3       	ldi	r24, 0x32	; 50
-  d4:	81 83       	std	Z+1, r24	; 0x01
-  d6:	08 95       	ret
+	PORTMUX.TCAROUTEA |= (PORTMUX_TCA00_bm | PORTMUX_TCA01_bm); //Enables PORTMUXD to achieve Waveform Output on the PWM Pins
+  d6:	e0 ee       	ldi	r30, 0xE0	; 224
+  d8:	f5 e0       	ldi	r31, 0x05	; 5
+  da:	84 81       	ldd	r24, Z+4	; 0x04
+  dc:	83 60       	ori	r24, 0x03	; 3
+  de:	84 83       	std	Z+4, r24	; 0x04
+	
+	TCA0.SINGLE.CTRLA = TCA_SINGLE_CLKSEL_DIV1_gc    /* System Clock */
+  e0:	e0 e0       	ldi	r30, 0x00	; 0
+  e2:	fa e0       	ldi	r31, 0x0A	; 10
+  e4:	81 e0       	ldi	r24, 0x01	; 1
+  e6:	80 83       	st	Z, r24
+	                    | 1 << TCA_SINGLE_ENABLE_bp; /* Module Enable: enabled */
+	TCA0.SINGLE.CTRLB = 0 << TCA_SINGLE_ALUPD_bp            /* Auto Lock Update: disabled */
+  e8:	83 e0       	ldi	r24, 0x03	; 3
+  ea:	81 83       	std	Z+1, r24	; 0x01
+	                    | 0 << TCA_SINGLE_CMP0EN_bp         /* Setting: disabled */
+	                    | 0 << TCA_SINGLE_CMP1EN_bp         /* Setting: disabled */
+	                    | 0 << TCA_SINGLE_CMP2EN_bp         /* Setting: disabled */
+	                    | TCA_SINGLE_WGMODE_SINGLESLOPE_gc; /*  */
+	TCA0.SINGLE.CTRLC = 1 << TCA_SINGLE_CMP0OV_bp    /* Setting: enabled */
+  ec:	82 83       	std	Z+2, r24	; 0x02
+		| 1 << TCA_SINGLE_CMP1OV_bp  /* Setting: enabled */
+		| 0 << TCA_SINGLE_CMP2OV_bp; /* Setting: disabled */
+	TCA0.SINGLE.PER = 50;
+  ee:	82 e3       	ldi	r24, 0x32	; 50
+  f0:	90 e0       	ldi	r25, 0x00	; 0
+  f2:	86 a3       	std	Z+38, r24	; 0x26
+  f4:	97 a3       	std	Z+39, r25	; 0x27
+	TCA0.SINGLE.CMP0 = 25;
+  f6:	89 e1       	ldi	r24, 0x19	; 25
+  f8:	90 e0       	ldi	r25, 0x00	; 0
+  fa:	80 a7       	std	Z+40, r24	; 0x28
+  fc:	91 a7       	std	Z+41, r25	; 0x29
+  fe:	08 95       	ret
 
-000000d8 <main>:
+00000100 <main>:
 
 
 
 int main(void)
 {
 	ClkSelect();
-  d8:	0e 94 5c 00 	call	0xb8	; 0xb8 <ClkSelect>
-		
+ 100:	0e 94 5c 00 	call	0xb8	; 0xb8 <ClkSelect>
     }
 }
 
 void PWM_Init(void){
-	PORTD_DIR = (PWM1 | PWM2);  //Setting PWM pins as output
-  dc:	87 e0       	ldi	r24, 0x07	; 7
-  de:	80 93 60 04 	sts	0x0460, r24	; 0x800460 <__TEXT_REGION_LENGTH__+0x700460>
+	
+	PORTD_DIR = 0XFF; //Set PORTD as output.
+ 104:	8f ef       	ldi	r24, 0xFF	; 255
+ 106:	80 93 60 04 	sts	0x0460, r24	; 0x800460 <__TEXT_REGION_LENGTH__+0x700460>
 
 int main(void)
 {
 	ClkSelect();
 	PWM_Init();   
 	Timer0_Init();
-  e2:	0e 94 62 00 	call	0xc4	; 0xc4 <Timer0_Init>
+ 10a:	0e 94 6b 00 	call	0xd6	; 0xd6 <Timer0_Init>
 	
 	PORTF_DIR = PIN5_bm;
-  e6:	80 e2       	ldi	r24, 0x20	; 32
-  e8:	80 93 a0 04 	sts	0x04A0, r24	; 0x8004a0 <__TEXT_REGION_LENGTH__+0x7004a0>
+ 10e:	80 e2       	ldi	r24, 0x20	; 32
+ 110:	80 93 a0 04 	sts	0x04A0, r24	; 0x8004a0 <__TEXT_REGION_LENGTH__+0x7004a0>
 	
     while (1) 
     {
 		
 		PORTF.OUTTGL = PIN5_bm;
-  ec:	e0 ea       	ldi	r30, 0xA0	; 160
-  ee:	f4 e0       	ldi	r31, 0x04	; 4
-  f0:	87 83       	std	Z+7, r24	; 0x07
+ 114:	e0 ea       	ldi	r30, 0xA0	; 160
+ 116:	f4 e0       	ldi	r31, 0x04	; 4
+ 118:	87 83       	std	Z+7, r24	; 0x07
 	#else
 		//round up by default
 		__ticks_dc = (uint32_t)(ceil(fabs(__tmp)));
 	#endif
 
 	__builtin_avr_delay_cycles(__ticks_dc);
-  f2:	2f ef       	ldi	r18, 0xFF	; 255
-  f4:	34 e3       	ldi	r19, 0x34	; 52
-  f6:	9c e0       	ldi	r25, 0x0C	; 12
-  f8:	21 50       	subi	r18, 0x01	; 1
-  fa:	30 40       	sbci	r19, 0x00	; 0
-  fc:	90 40       	sbci	r25, 0x00	; 0
-  fe:	e1 f7       	brne	.-8      	; 0xf8 <main+0x20>
- 100:	00 c0       	rjmp	.+0      	; 0x102 <main+0x2a>
- 102:	00 00       	nop
- 104:	f5 cf       	rjmp	.-22     	; 0xf0 <main+0x18>
+ 11a:	2f ef       	ldi	r18, 0xFF	; 255
+ 11c:	34 e3       	ldi	r19, 0x34	; 52
+ 11e:	9c e0       	ldi	r25, 0x0C	; 12
+ 120:	21 50       	subi	r18, 0x01	; 1
+ 122:	30 40       	sbci	r19, 0x00	; 0
+ 124:	90 40       	sbci	r25, 0x00	; 0
+ 126:	e1 f7       	brne	.-8      	; 0x120 <main+0x20>
+ 128:	00 c0       	rjmp	.+0      	; 0x12a <main+0x2a>
+ 12a:	00 00       	nop
+ 12c:	f5 cf       	rjmp	.-22     	; 0x118 <main+0x18>
 
-00000106 <_exit>:
- 106:	f8 94       	cli
+0000012e <_exit>:
+ 12e:	f8 94       	cli
 
-00000108 <__stop_program>:
- 108:	ff cf       	rjmp	.-2      	; 0x108 <__stop_program>
+00000130 <__stop_program>:
+ 130:	ff cf       	rjmp	.-2      	; 0x130 <__stop_program>
