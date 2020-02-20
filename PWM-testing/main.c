@@ -30,23 +30,36 @@ void Timer0_Init(void);
 int main(void)
 {
 	ClkSelect();
-	PWM_Init();   
 	Timer0_Init();
+	PWM_Init();   
 	
-	PORTF_DIR = PIN5_bm;
+	
+	//PORTF_DIR = PIN5_bm;
 	
     while (1) 
     {
 		
-		PORTF.OUTTGL = PIN5_bm;
-		_delay_ms(200);
+		//PORTF.OUTTGL = PIN5_bm;
+		//_delay_ms(200);
 		
+		// Code for duty cycle modulation will be under this line. 
+		
+		// Pseudocode:
+		
+		// set PWM1 as output
+		// generate PWM out on PWM 1
+		// 
     }
 }
 
 void PWM_Init(void){
 	
 	PORTD_DIR = 0XFF; //Set PORTD as output.
+	
+	
+	TCA0.SINGLE.CMP0 = 25;  //Dette definerer duty cycle ut på PD0
+	TCA0.SINGLE.PER = 50;  //Dette definerer PWM-periodetiden.
+	TCA0.SINGLE.CMP1 = 5;  //Dette definerer duty cycle ut på PD0
 	
 	
 }
@@ -61,17 +74,20 @@ void ClkSelect(void){
 void Timer0_Init(void){
 	PORTMUX.TCAROUTEA |= (PORTMUX_TCA00_bm | PORTMUX_TCA01_bm); //Enables PORTMUXD to achieve Waveform Output on the PWM Pins
 	
+	
+	TCA0.SINGLE.CTRLB = 0 << TCA_SINGLE_ALUPD_bp            /* Auto Lock Update: disabled */
+	                    | 1 << TCA_SINGLE_CMP0EN_bp         /* Setting: enabled */
+	                    | 1 << TCA_SINGLE_CMP1EN_bp         /* Setting: enabled */
+	                    | 1 << TCA_SINGLE_CMP2EN_bp         /* Setting: enabled */
+	                    | TCA_SINGLE_WGMODE_SINGLESLOPE_gc; /*  */
+						
+	TCA0.SINGLE.CTRLC = 1 << TCA_SINGLE_CMP0OV_bp    /* Setting: enabled */
+						| 1 << TCA_SINGLE_CMP1OV_bp  /* Setting: enabled */
+						| 0 << TCA_SINGLE_CMP2OV_bp; /* Setting: disabled */
+	
 	TCA0.SINGLE.CTRLA = TCA_SINGLE_CLKSEL_DIV1_gc    /* System Clock */
 	                    | 1 << TCA_SINGLE_ENABLE_bp; /* Module Enable: enabled */
-	TCA0.SINGLE.CTRLB = 0 << TCA_SINGLE_ALUPD_bp            /* Auto Lock Update: disabled */
-	                    | 0 << TCA_SINGLE_CMP0EN_bp         /* Setting: disabled */
-	                    | 0 << TCA_SINGLE_CMP1EN_bp         /* Setting: disabled */
-	                    | 0 << TCA_SINGLE_CMP2EN_bp         /* Setting: disabled */
-	                    | TCA_SINGLE_WGMODE_SINGLESLOPE_gc; /*  */
-	TCA0.SINGLE.CTRLC = 1 << TCA_SINGLE_CMP0OV_bp    /* Setting: enabled */
-		| 1 << TCA_SINGLE_CMP1OV_bp  /* Setting: enabled */
-		| 0 << TCA_SINGLE_CMP2OV_bp; /* Setting: disabled */
-	TCA0.SINGLE.PER = 50;
-	TCA0.SINGLE.CMP0 = 25;  //Dette definerer duty cycle ut på PD0
-	
+						
+						TCA0.SINGLE.PERBUF = 50;
+
 }
