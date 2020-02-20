@@ -39,7 +39,7 @@ int main(void)
 	PWM_Init();   
 	
 	
-	
+	PORTF_DIR = PIN5_bm;  //Just for LED testing
 	
 	
     while (1) 
@@ -79,10 +79,11 @@ void PWM_Init(void){
 
 	
 	
-	TCA0.SINGLE.PER = 50;  //Dette definerer PWM-periodetiden.
-	//TCA0.SINGLE.CMP1 = 5;  //Dette definerer duty cycle ut på PD0
+	TCA0.SINGLE.PER = 500;  //Dette definerer PWM-periodetiden.
+	//TCA0.SINGLE.CMP1 = 5;  //Dette definerer duty cycle ut på PD1
 	
 	TCA0.SINGLE.INTCTRL = (1<<OVF);  //Enables overflow interrupt in Timer 0
+	
 	
 	
 }
@@ -91,7 +92,7 @@ void ClkSelect(void){
 	_PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, 0); //Forces 20MHz CPU clock frequency
 	_PROTECTED_WRITE(CLKCTRL.MCLKCTRLA, (1<<7)); //Sender klokke-signal ut på PA7-pin
 	
-	PORTF_DIR = PIN5_bm;  //Just for LED testing
+	
 	PORTA_DIR |= PIN7_bm; //PA7 as output for clock frequency check
 	
 }
@@ -112,41 +113,64 @@ void Timer0_Init(void){
 	
 	TCA0.SINGLE.CTRLA = TCA_SINGLE_CLKSEL_DIV1_gc    /* System Clock */
 	                    | 1 << TCA_SINGLE_ENABLE_bp; /* Module Enable: enabled */
-						
-						//TCA0.SINGLE.PERBUF = 50;
 
 }
 
 
 ISR(TCA0_OVF_vect){
+	TCA0_SINGLE_INTFLAGS = (1<<OVF) | (1<<4); //clearing the interrupt flag
 	
-	
-	if (TCA0.SINGLE.CMP0 == 10) {  //Dette definerer duty cycle ut på PD0
+	switch (TCA0.SINGLE.CMP0)
+	{
+		case 10:
+			TCA0.SINGLE.CMP0 = 20;
+			TCA0.SINGLE.CNT = 0;
+			break;
 		
-		TCA0.SINGLE.CMP0 = 20;
-		TCA0.SINGLE.CNT = 0;
+		case 20:
+			TCA0.SINGLE.CMP0 = 30;
+			TCA0.SINGLE.CNT = 0;
+			break;
 		
-	
+		case 30:
+			TCA0.SINGLE.CMP0 = 5;
+			TCA0.SINGLE.CNT = 0;
+			break;
+		
+		case 5:
+			TCA0.SINGLE.CMP0 = 10;
+			TCA0.SINGLE.CNT = 0;
+			break;
 	}
 	
-	else if (TCA0.SINGLE.CMP0 == 20){
 	
-		TCA0.SINGLE.CMP0 = 30;
-		TCA0.SINGLE.CNT = 0;
-		
-	}
 	
-	else if (TCA0.SINGLE.CMP0 == 30){
-	
-		TCA0.SINGLE.CMP0 = 5;
-		TCA0.SINGLE.CNT = 0;
-		
-	}
-	
-	else  {
-		TCA0.SINGLE.CMP0 = 10;
-		TCA0.SINGLE.CNT = 0;
-	}
+	//if (TCA0.SINGLE.CMP0 == 10) {  //Dette definerer duty cycle ut på PD0
+		//
+		//TCA0.SINGLE.CMP0 = 20;
+		//TCA0.SINGLE.CNT = 0;
+		//
+	//
+	//}
+	//
+	//else if (TCA0.SINGLE.CMP0 == 20){
+	//
+		//TCA0.SINGLE.CMP0 = 30;
+		//TCA0.SINGLE.CNT = 0;
+		//
+	//}
+	//
+	//else if (TCA0.SINGLE.CMP0 == 30){
+	//
+		//TCA0.SINGLE.CMP0 = 5;
+		//TCA0.SINGLE.CNT = 0;
+		//
+	//}
+	//
+	//else  {
+		//TCA0.SINGLE.CMP0 = 10;
+		//TCA0.SINGLE.CNT = 0;
+	//}
 	
 		
 	//IntCount++;
