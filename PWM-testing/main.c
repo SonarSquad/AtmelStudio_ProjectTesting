@@ -17,6 +17,7 @@
 #define CMP1EN 5
 #define WGMODE 0
 #define CNTEI 0
+#define OVF 0
 
 // Må lage en pinDefines.h som inneholder alle defines for å gjøre alt mere oversiktlig!
 
@@ -29,12 +30,14 @@ void Timer0_Init(void);
 
 int main(void)
 {
+	sei();  //Global interrupts enabled
 	ClkSelect();
 	Timer0_Init();
 	PWM_Init();   
 	
+	PORTF_DIR = PIN5_bm;
 	
-	//PORTF_DIR = PIN5_bm;
+	TCA0.SINGLE.CMP0 = 10;  //Dette definerer duty cycle ut på PD0
 	
     while (1) 
     {
@@ -47,6 +50,7 @@ int main(void)
 		// Pseudocode:
 		
 		// set PWM1 as output
+		
 		// generate PWM out on PWM 1
 		// 
     }
@@ -57,9 +61,10 @@ void PWM_Init(void){
 	PORTD_DIR = 0XFF; //Set PORTD as output.
 	
 	
-	TCA0.SINGLE.CMP0 = 25;  //Dette definerer duty cycle ut på PD0
 	TCA0.SINGLE.PER = 50;  //Dette definerer PWM-periodetiden.
-	TCA0.SINGLE.CMP1 = 5;  //Dette definerer duty cycle ut på PD0
+	//TCA0.SINGLE.CMP1 = 5;  //Dette definerer duty cycle ut på PD0
+	
+	TCA0.SINGLE.INTCTRL = (1<<OVF);  //Enables overflow interrupt in Timer 0
 	
 	
 }
@@ -88,6 +93,27 @@ void Timer0_Init(void){
 	TCA0.SINGLE.CTRLA = TCA_SINGLE_CLKSEL_DIV1_gc    /* System Clock */
 	                    | 1 << TCA_SINGLE_ENABLE_bp; /* Module Enable: enabled */
 						
-						TCA0.SINGLE.PERBUF = 50;
+						//TCA0.SINGLE.PERBUF = 50;
 
+}
+
+
+ISR(TCA0_OVF_vect){
+	
+	if (TCA0.SINGLE.CMP0 == 10) {  //Dette definerer duty cycle ut på PD0
+		
+		TCA0.SINGLE.CMP0 = 25;
+		
+	
+	}
+			
+	else  {//Dette definerer duty cycle ut på PD0
+		
+		TCA0.SINGLE.CMP0 = 10;
+		
+		}
+		
+		
+		
+			
 }
