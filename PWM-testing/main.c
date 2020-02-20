@@ -19,6 +19,8 @@
 #define CNTEI 0
 #define OVF 0
 
+volatile int IntCount = 0;
+
 // Må lage en pinDefines.h som inneholder alle defines for å gjøre alt mere oversiktlig!
 
 
@@ -33,19 +35,34 @@ int main(void)
 	sei();  //Global interrupts enabled
 	ClkSelect();
 	Timer0_Init();
+	TCA0.SINGLE.CMP0 = 10;  //Dette definerer duty cycle ut på PD0
 	PWM_Init();   
 	
-	PORTF_DIR = PIN5_bm;
 	
-	TCA0.SINGLE.CMP0 = 10;  //Dette definerer duty cycle ut på PD0
+	
+	
 	
     while (1) 
     {
 		
-		//PORTF.OUTTGL = PIN5_bm;
-		//_delay_ms(200);
+		
 		
 		// Code for duty cycle modulation will be under this line. 
+		
+		//if (IntCount > 3) {
+			//IntCount = 0;
+			////cli();
+			//PORTD_OUTCLR = PIN0_bm;
+			//PORTD_DIRCLR = PIN0_bm;
+			//
+			////PORTF.OUTTGL = PIN5_bm;
+			//
+			//PORTD_DIR = PIN0_bm;
+			////PORTF.OUT = PIN5_bm;
+			//
+			////sei();
+		//}
+		
 		
 		// Pseudocode:
 		
@@ -59,6 +76,7 @@ int main(void)
 void PWM_Init(void){
 	
 	PORTD_DIR = 0XFF; //Set PORTD as output.
+
 	
 	
 	TCA0.SINGLE.PER = 50;  //Dette definerer PWM-periodetiden.
@@ -72,7 +90,9 @@ void PWM_Init(void){
 void ClkSelect(void){
 	_PROTECTED_WRITE(CLKCTRL.MCLKCTRLB, 0); //Forces 20MHz CPU clock frequency
 	_PROTECTED_WRITE(CLKCTRL.MCLKCTRLA, (1<<7)); //Sender klokke-signal ut på PA7-pin
-	PORTA_DIR |= (1<<7); //PA7 as output for clock frequency check
+	
+	PORTF_DIR = PIN5_bm;  //Just for LED testing
+	PORTA_DIR |= PIN7_bm; //PA7 as output for clock frequency check
 	
 }
 
@@ -100,20 +120,37 @@ void Timer0_Init(void){
 
 ISR(TCA0_OVF_vect){
 	
+	
 	if (TCA0.SINGLE.CMP0 == 10) {  //Dette definerer duty cycle ut på PD0
 		
-		TCA0.SINGLE.CMP0 = 25;
+		TCA0.SINGLE.CMP0 = 20;
+		TCA0.SINGLE.CNT = 0;
 		
 	
 	}
-			
-	else  {//Dette definerer duty cycle ut på PD0
+	
+	else if (TCA0.SINGLE.CMP0 == 20){
+	
+		TCA0.SINGLE.CMP0 = 30;
+		TCA0.SINGLE.CNT = 0;
 		
+	}
+	
+	else if (TCA0.SINGLE.CMP0 == 30){
+	
+		TCA0.SINGLE.CMP0 = 5;
+		TCA0.SINGLE.CNT = 0;
+		
+	}
+	
+	else  {
 		TCA0.SINGLE.CMP0 = 10;
+		TCA0.SINGLE.CNT = 0;
+	}
+	
 		
-		}
-		
-		
-		
-			
+	//IntCount++;
+	
+	//asm (nop);
+	
 }
