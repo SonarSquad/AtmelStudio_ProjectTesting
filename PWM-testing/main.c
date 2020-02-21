@@ -19,6 +19,11 @@
 #define CNTEI 0
 #define OVF 0
 
+int lookUp1[] = {
+5 ,10 ,25, 10, 5,
+0 , 0, 0, 0, 0,
+};
+
 volatile int IntCount = 0;
 
 // Må lage en pinDefines.h som inneholder alle defines for å gjøre alt mere oversiktlig!
@@ -119,29 +124,33 @@ void Timer0_Init(void){
 
 ISR(TCA0_OVF_vect){
 	TCA0_SINGLE_INTFLAGS = (1<<OVF) | (1<<4); //clearing the interrupt flag
-	
-	switch (TCA0.SINGLE.CMP0)
-	{
-		case 10:
-			TCA0.SINGLE.CMP0 = 20;
-			TCA0.SINGLE.CNT = 0;
-			break;
-		
-		case 20:
-			TCA0.SINGLE.CMP0 = 30;
-			TCA0.SINGLE.CNT = 0;
-			break;
-		
-		case 30:
-			TCA0.SINGLE.CMP0 = 5;
-			TCA0.SINGLE.CNT = 0;
-			break;
-		
-		case 5:
-			TCA0.SINGLE.CMP0 = 10;
-			TCA0.SINGLE.CNT = 0;
-			break;
+	static int num;
+	TCA0.SINGLE.CMP0 = looup1[num];
+	if(++num >= 10){ // Pre-increment num then check it's below 10.
+		num = 0;       // Reset num.
 	}
+	//switch (TCA0.SINGLE.CMP0)
+	//{
+		//case 10:
+			//TCA0.SINGLE.CMP0 = 20;
+			//TCA0.SINGLE.CNT = 0;
+			//break;
+		//
+		//case 20:
+			//TCA0.SINGLE.CMP0 = 30;
+			//TCA0.SINGLE.CNT = 0;
+			//break;
+		//
+		//case 30:
+			//TCA0.SINGLE.CMP0 = 5;
+			//TCA0.SINGLE.CNT = 0;
+			//break;
+		//
+		//case 5:
+			//TCA0.SINGLE.CMP0 = 10;
+			//TCA0.SINGLE.CNT = 0;
+			//break;
+	//}
 	
 	
 	
