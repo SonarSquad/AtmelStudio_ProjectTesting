@@ -18,6 +18,7 @@
 #define WGMODE 0
 #define CNTEI 0
 #define OVF 0
+#define DIR 0
 
 volatile int IntCount = 0;
 
@@ -35,7 +36,7 @@ int main(void)
 	sei();  //Global interrupts enabled
 	ClkSelect();
 	Timer0_Init();
-	TCA0.SINGLE.CMP0 = 10;  //Dette definerer duty cycle ut på PD0
+	TCA0.SINGLE.CMP0 = 33;  //Dette definerer duty cycle ut på PD0
 	PWM_Init();   
 	
 	
@@ -49,19 +50,19 @@ int main(void)
 		
 		// Code for duty cycle modulation will be under this line. 
 		
-		//if (IntCount > 3) {
-			//IntCount = 0;
-			////cli();
-			//PORTD_OUTCLR = PIN0_bm;
-			//PORTD_DIRCLR = PIN0_bm;
-			//
-			////PORTF.OUTTGL = PIN5_bm;
-			//
-			//PORTD_DIR = PIN0_bm;
-			////PORTF.OUT = PIN5_bm;
-			//
-			////sei();
-		//}
+		if (IntCount == 3) {
+			
+			cli();	
+			TCA0.SINGLE.CTRLESET = (1<<DIR);  //Sets the timer to count down. Trying to have the 2nd half-period PWM to set on compare match instead of clear :) 
+			sei();
+		}
+		
+		else if(IntCount >= 6){
+			cli();
+			IntCount = 0;
+			TCA0.SINGLE.CTRLESET &= (0<<DIR);  //Sets the timer to count up again. 
+			sei();
+		}
 		
 		
 		// Pseudocode:
@@ -77,15 +78,10 @@ void PWM_Init(void){
 	
 	PORTD_DIR = 0XFF; //Set PORTD as output.
 
-	
-	
-	TCA0.SINGLE.PER = 500;  //Dette definerer PWM-periodetiden.
+	TCA0.SINGLE.PER = 67;  //Dette definerer PWM-periodetiden. 67 er for 3-bits oppløsning med 50kHz resultat-sinus. 
 	//TCA0.SINGLE.CMP1 = 5;  //Dette definerer duty cycle ut på PD1
 	
 	TCA0.SINGLE.INTCTRL = (1<<OVF);  //Enables overflow interrupt in Timer 0
-	
-	
-	
 }
 
 void ClkSelect(void){
@@ -94,7 +90,6 @@ void ClkSelect(void){
 	
 	
 	PORTA_DIR |= PIN7_bm; //PA7 as output for clock frequency check
-	
 }
 
 void Timer0_Init(void){
@@ -113,7 +108,6 @@ void Timer0_Init(void){
 	
 	TCA0.SINGLE.CTRLA = TCA_SINGLE_CLKSEL_DIV1_gc    /* System Clock */
 	                    | 1 << TCA_SINGLE_ENABLE_bp; /* Module Enable: enabled */
-
 }
 
 
@@ -122,28 +116,19 @@ ISR(TCA0_OVF_vect){
 	
 	switch (TCA0.SINGLE.CMP0)
 	{
-		case 10:
-			TCA0.SINGLE.CMP0 = 20;
+		case 33:
+			TCA0.SINGLE.CMP0 = 67;
 			TCA0.SINGLE.CNT = 0;
 			break;
 		
-		case 20:
-			TCA0.SINGLE.CMP0 = 30;
+		case 67:
+			TCA0.SINGLE.CMP0 = 35;
 			TCA0.SINGLE.CNT = 0;
 			break;
-		
-		case 30:
-			TCA0.SINGLE.CMP0 = 5;
-			TCA0.SINGLE.CNT = 0;
-			break;
-		
-		case 5:
-			TCA0.SINGLE.CMP0 = 10;
-			TCA0.SINGLE.CNT = 0;
-			break;
+	
 	}
 	
-	
+	IntCount++;
 	
 	//if (TCA0.SINGLE.CMP0 == 10) {  //Dette definerer duty cycle ut på PD0
 		//
@@ -173,7 +158,7 @@ ISR(TCA0_OVF_vect){
 	//}
 	
 		
-	//IntCount++;
+	
 	
 	//asm (nop);
 	
