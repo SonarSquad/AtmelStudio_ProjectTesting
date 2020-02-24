@@ -60,7 +60,7 @@ int main(void)
 		else if(IntCount >= 6){
 			cli();
 			IntCount = 0;
-			TCA0.SINGLE.CTRLESET &= (0<<DIR);  //Sets the timer to count up again. 
+			TCA0.SINGLE.CTRLESET &= ~(1<<DIR);  //Sets the timer to count up again. 
 			sei();
 		}
 		
