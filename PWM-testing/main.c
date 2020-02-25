@@ -29,6 +29,12 @@ void PWM_Init(void);
 void ClkSelect(void);
 void Timer0_Init(void);
 
+int lookUp1[] = {
+	0, 0, 0, 33 ,67 ,33
+};
+
+//volatile int num = 0;
+
 
 
 int main(void)
@@ -36,7 +42,7 @@ int main(void)
 	sei();  //Global interrupts enabled
 	ClkSelect();
 	Timer0_Init();
-	TCA0.SINGLE.CMP0 = 33;  //Dette definerer duty cycle ut på PD0
+	TCA0.SINGLE.CMP0 = 67;  //Dette definerer duty cycle ut på PD0
 	PWM_Init();   
 	
 	
@@ -50,20 +56,20 @@ int main(void)
 		
 		// Code for duty cycle modulation will be under this line. 
 		
-		if (IntCount == 3) {
-			
-			cli();	
-			TCA0.SINGLE.CTRLESET = (1<<DIR);  //Sets the timer to count down. Trying to have the 2nd half-period PWM to set on compare match instead of clear :) 
-			sei();
-		}
-		
-		else if(IntCount >= 6){
-			cli();
-			IntCount = 0;
-			TCA0.SINGLE.CTRLESET &= ~(1<<DIR);  //Sets the timer to count up again. 
-			sei();
-		}
-		
+		//if (IntCount == 3) {
+			//
+			////cli();	
+			//TCA0.SINGLE.CTRLESET = (1<<DIR);  //Sets the timer to count down. Trying to have the 2nd half-period PWM to set on compare match instead of clear :) 
+			////sei();
+		//}
+		//
+		//else if(IntCount >= 6){
+			////cli();
+			//IntCount = 0;
+			//TCA0.SINGLE.CTRLESET = (0<<DIR);  //Sets the timer to count up again. 
+			////sei();
+		//}
+		//
 		
 		// Pseudocode:
 		
@@ -112,54 +118,21 @@ void Timer0_Init(void){
 
 
 ISR(TCA0_OVF_vect){
-	TCA0_SINGLE_INTFLAGS = (1<<OVF) | (1<<4); //clearing the interrupt flag
 	
-	switch (TCA0.SINGLE.CMP0)
-	{
-		case 33:
-			TCA0.SINGLE.CMP0 = 67;
-			TCA0.SINGLE.CNT = 0;
-			break;
+	//TCA0.SINGLE.INTFLAGS = (1<<OVF) | (1<<4); //clearing the interrupt flag
+	
+	static int num;
+	TCA0.SINGLE.CMP0 = lookUp1[num];
+	TCA0.SINGLE.CNT = 0;
+	if(++num >= 6){ // Pre-increment num then check it's below 10.
+		num = 0;       // Reset num.
+
 		
-		case 67:
-			TCA0.SINGLE.CMP0 = 35;
-			TCA0.SINGLE.CNT = 0;
-			break;
-	
 	}
 	
-	IntCount++;
-	
-	//if (TCA0.SINGLE.CMP0 == 10) {  //Dette definerer duty cycle ut på PD0
-		//
-		//TCA0.SINGLE.CMP0 = 20;
-		//TCA0.SINGLE.CNT = 0;
-		//
-	//
-	//}
-	//
-	//else if (TCA0.SINGLE.CMP0 == 20){
-	//
-		//TCA0.SINGLE.CMP0 = 30;
-		//TCA0.SINGLE.CNT = 0;
-		//
-	//}
-	//
-	//else if (TCA0.SINGLE.CMP0 == 30){
-	//
-		//TCA0.SINGLE.CMP0 = 5;
-		//TCA0.SINGLE.CNT = 0;
-		//
-	//}
-	//
-	//else  {
-		//TCA0.SINGLE.CMP0 = 10;
-		//TCA0.SINGLE.CNT = 0;
-	//}
-	
-		
+	//IntCount++;
 	
 	
-	//asm (nop);
+
 	
 }
