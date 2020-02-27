@@ -19,6 +19,8 @@
 #define CNTEI 0
 #define OVF 0
 #define DIR 0
+#define HUNF 1
+#define LUNF 0
 
 //pinDefines.h to be created later
 
@@ -27,6 +29,13 @@ void PWM_Init(void);
 void ClkSelect(void);
 void Timer0_Init(void);
 
+int volatile MaxVerdi = 67;
+
+int volatile highCount = 0;
+int volatile lowCount = 0;
+
+static volatile num = 0;
+
 int lookUp1[] = {   //Need 5 clock cycles LESS than PER (MAX value) register, since reti (return from interrupt) takes 4 clock cycles.
 	225, 132, 225,
 	0, 0, 0,
@@ -34,15 +43,13 @@ int lookUp1[] = {   //Need 5 clock cycles LESS than PER (MAX value) register, si
 };
 
 int lookUpTest[] = {   //Need 5 clock cycles LESS than PER (MAX value) register, since reti (return from interrupt) takes 4 clock cycles.
-	33, 67, 33,
-	0, 0, 0,
-	33, 67, 33
+	5, 5, 5, 5
 };
 
 int lookUp2[] = {	//Need 5 clock cycles LESS than PER (MAX value) register, since reti (return from interrupt) takes 4 clock cycles.
-	66, 90, 66,
+	30, 40, 50,
 	0, 0, 0,
-	66, 90, 66
+	60, 70, 40
 };
 
 
@@ -66,10 +73,10 @@ void PWM_Init(void){
 	
 	PORTD_DIR = 0XFF; //Set PORTD as output.
 	
-	TCA0.SPLIT.LPER = 127; /*  Low-byte Timer Period Register: 67 */  //This sets the TOP counter value (PD0).
-	TCA0.SPLIT.HPER = 127; /*  High-byte Timer Period Register: 67 */ //This sets the TOP counter value (PD1).
+	TCA0.SPLIT.LPER = MaxVerdi; /*  Low-byte Timer Period Register: 67 */  //This sets the TOP counter value (PD0).
+	TCA0.SPLIT.HPER = TCA0.SPLIT.LPER; /*  High-byte Timer Period Register: 67 */ //This sets the TOP counter value (PD1).
 	
-	TCA0.SPLIT.INTCTRL = (0<<4) | (0<<5) | (0<<6) | (1<<1) | (0<<0);  //Enables overflow interrupt in Timer 0
+	TCA0.SPLIT.INTCTRL = (1<<HUNF);  //Enables overflow interrupt in Timer 0
 	//TCA0.SPLIT.INTFLAGS = (1<<3) | (1<<4) | (1<<5) | (1<<1) | (1<<0);  //Enables overflow interrupt in Timer 0
 	
 }
@@ -97,20 +104,41 @@ void Timer0_Init(void){
 
 
 ISR(TCA0_HUNF_vect){
-	TCA0_SPLIT_INTFLAGS = (1<<OVF) | (1<<1); //clearing the interrupt flag.  For some reason this messes up the PWM output more. 
-	
-	static int num;
+	//static int num;
 
-	TCA0.SPLIT.LCMP0 = lookUp2[num]; /* Checks table for next duty cycle value */
-	TCA0.SPLIT.HCMP0 = lookUp2[num+3]; /* Checks table for next duty cycle value */
-	TCA0.SPLIT.LCNT = 127;  //Since split mode uses downcount, the counter value is reset to it's max value.
-	TCA0.SPLIT.HCNT = 127;  //Since split mode uses downcount, the counter value is reset to it's max value.
+	//TCA0.SPLIT.LCMP0 = lookUpTest[num]; /* Checks table for next duty cycle value */
+	TCA0.SPLIT.HCMP0 = lookUpTest[num]; /* Checks table for next duty cycle value */
+	//TCA0.SPLIT.LCNT = 61;  //Since split mode uses downcount, the counter value is reset to it's max value.
+	TCA0.SPLIT.HCNT = 67;  //Since split mode uses downcount, the counter value is reset to it's max value.
+	//
 	
-	if(++num >= 6){ // Pre-increment num then check it's below 10.
+	if(++num == 3){ // Pre-increment num then check it's below 10.
 		num = 0;       // Reset num.
+		TCA0.SPLIT.INTCTRL = (0<<HUNF) | (1<<LUNF); 
+		TCA0.SPLIT.HCMP0 = 0;
+		TCA0.SPLIT.LCNT = 67;
 	}
 	
+	TCA0_SPLIT_INTFLAGS = (1<<HUNF); //clearing the interrupt flag.  For some reason this messes up the PWM output more. 
 	
-	//TCA0.SPLIT.INTFLAGS = (1<<1) | (1<<0); 
+}
+
+ISR(TCA0_LUNF_vect){
+	//static int num;
+
+	TCA0.SPLIT.LCMP0 = lookUpTest[num]; /* Checks table for next duty cycle value */
+	//TCA0.SPLIT.HCMP0 = lookUpTest[num+3]; /* Checks table for next duty cycle value */
+	TCA0.SPLIT.LCNT = 67;  //Since split mode uses downcount, the counter value is reset to it's max value.
+	//TCA0.SPLIT.HCNT = TCA0.SPLIT.LCNT;  //Since split mode uses downcount, the counter value is reset to it's max value.
+	//
+	
+	if(++num == 3){ // Pre-increment num then check it's below 10.
+		num = 0;       // Reset num.
+		TCA0.SPLIT.INTCTRL = (1<<HUNF) | (0<<LUNF); 
+		TCA0.SPLIT.LCMP0 = 0;
+		TCA0.SPLIT.HCNT = 67;
+	}
+	
+	TCA0_SPLIT_INTFLAGS = (1<<LUNF); //clearing the interrupt flag.  For some reason this messes up the PWM output more. 
 	
 }
